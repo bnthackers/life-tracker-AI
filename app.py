@@ -4,10 +4,33 @@ from datetime import date
 import os
 from openai import OpenAI
 
-# ---------- CONFIG ----------
-st.set_page_config(page_title="AI Life Tracker", layout="centered")
+# ---------- PAGE CONFIG ----------
+st.set_page_config(page_title="AI Life Tracker", layout="wide")
 
-st.title("AI Life Tracker")
+# ---------- CUSTOM CSS ----------
+st.markdown("""
+    <style>
+    .main {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: white;
+    }
+    .card {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        margin-bottom: 15px;
+    }
+    .stButton>button {
+        border-radius: 10px;
+        height: 45px;
+        width: 100%;
+        font-weight: bold;
+        background: linear-gradient(90deg, #3b82f6, #06b6d4);
+        color: white;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # ---------- LOAD DATA ----------
 FILE = "data.csv"
@@ -21,15 +44,25 @@ def load_data():
 def save_data(df):
     df.to_csv(FILE, index=False)
 
+# ---------- HEADER ----------
+st.title("AI Life Tracker Dashboard")
+st.caption("Track. Improve. Dominate your habits.")
+
 df = load_data()
 
 # ---------- INPUT SECTION ----------
+st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.subheader("Daily Check-in")
 
-gym = st.selectbox("Did you go to gym?", ["Yes", "No"])
-study = st.number_input("Study hours", min_value=0.0, step=0.5)
-junk = st.selectbox("Did you eat junk food?", ["Yes", "No"])
-spend = st.number_input("Money spent today (₹)", min_value=0)
+col1, col2 = st.columns(2)
+
+with col1:
+    gym = st.selectbox("Gym", ["Yes", "No"])
+    junk = st.selectbox("Junk Food", ["Yes", "No"])
+
+with col2:
+    study = st.number_input("Study Hours", min_value=0.0, step=0.5)
+    spend = st.number_input("Money Spent (₹)", min_value=0)
 
 if st.button("Save Today"):
     new_data = pd.DataFrame({
@@ -44,56 +77,61 @@ if st.button("Save Today"):
     save_data(df)
     st.success("Saved successfully!")
 
+st.markdown("</div>", unsafe_allow_html=True)
+
 # ---------- DASHBOARD ----------
-st.subheader("Dashboard")
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+st.subheader("Stats Overview")
 
 if not df.empty:
-    st.write("Total Spending:", int(df["spending"].sum()))
-    st.write("Total Study Hours:", float(df["study_hours"].sum()))
+    col1, col2, col3 = st.columns(3)
 
-    st.dataframe(df.tail(7))
+    col1.metric("Total Spending", f"₹{int(df['spending'].sum())}")
+    col2.metric("Study Hours", f"{float(df['study_hours'].sum())}")
+    col3.metric("Entries", len(df))
+
+    st.line_chart(df["study_hours"])
+    st.bar_chart(df["spending"])
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------- AI COACH ----------
+st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.subheader("AI Coach")
 
 client = None
 if os.getenv("OPENAI_API_KEY"):
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+
 def get_ai_feedback(df):
     if df.empty:
-        return "No data yet. Start tracking first."
+        return "Start tracking first."
 
     recent = df.tail(5).to_dict(orient="records")
 
     prompt = f"""
-    Act like a strict but helpful personal coach.
+    You are a strict, high-performance life coach.
 
-    User data (last 5 days):
-    {recent}
+    Data: {recent}
 
-    Give:
-    - Short feedback
-    - What is going wrong
-    - Clear action for tomorrow
-
-    Keep it under 100 words.
+    Give short, sharp feedback and one action for tomorrow.
     """
 
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
-        )
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
 
-        return response.choices[0].message.content
-
-    except Exception as e:
-        return f"Error: {e}"
+    return response.choices[0].message.content
 
 if st.button("Get AI Feedback"):
     if client:
-        feedback = get_ai_feedback(df)
-        st.write(feedback)
+        st.write(get_ai_feedback(df))
     else:
-        st.warning("Add your OpenAI API key to enable AI feedback.")
+        st.warning("Add API key to enable AI")
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ---------- FOOTER ----------
+st.caption("Built with Streamlit + AI")
