@@ -33,6 +33,12 @@ def save_data(df):
 # ---------- LOAD ----------
 df = load_data()
 
+# ---------- SIDEBAR ----------
+if st.sidebar.button("Reset All Data"):
+    df = pd.DataFrame(columns=["date","gym","study_hours","junk_food","spending"])
+    df.to_csv(FILE, index=False)
+    st.sidebar.success("Data reset!")
+
 # ---------- HEADER ----------
 st.title("AI Life Tracker")
 st.caption("Track daily habits and stay disciplined")
