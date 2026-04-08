@@ -2,60 +2,39 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 
-# ---------- PAGE CONFIG ----------
+# ---------- CONFIG ----------
 st.set_page_config(page_title="AI Life Tracker", layout="wide")
 
-# ---------- MODERN UI CSS ----------
+# ---------- CLEAN MODERN UI ----------
 st.markdown("""
 <style>
-html, body, [class*="css"]  {
-    font-family: 'Inter', sans-serif;
-}
-
 .main {
-    background: linear-gradient(135deg, #0f172a, #020617);
-}
-
-.card {
-    background: rgba(30, 41, 59, 0.6);
-    backdrop-filter: blur(12px);
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    margin-bottom: 20px;
-}
-
-.title {
-    font-size: 40px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #38bdf8, #818cf8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.subtitle {
-    color: #94a3b8;
-    margin-bottom: 20px;
-}
-
-.stButton>button {
-    background: linear-gradient(90deg, #6366f1, #22c55e);
+    background-color: #0f172a;
     color: white;
+}
+.card {
+    background: #1e293b;
+    padding: 20px;
     border-radius: 12px;
-    height: 48px;
+    margin-bottom: 20px;
+}
+h1, h2, h3 {
+    color: #f8fafc;
+}
+.stButton>button {
+    background-color: #22c55e;
+    color: white;
+    border-radius: 8px;
+    height: 45px;
     font-weight: 600;
-    border: none;
 }
-
-.metric-card {
-    background: rgba(15, 23, 42, 0.7);
-    padding: 15px;
-    border-radius: 15px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.08);
+.metric {
+    font-size: 20px;
+    font-weight: bold;
 }
-
+.label {
+    color: #94a3b8;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -74,22 +53,26 @@ def save_data(df):
 df = load_data()
 
 # ---------- HEADER ----------
-st.markdown("<div class='title'>AI Life Tracker</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Build discipline. Track progress. Upgrade your life.</div>", unsafe_allow_html=True)
+st.title("AI Life Tracker")
+st.write("Simple daily tracking with clear insights")
 
 # ---------- INPUT ----------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.subheader("Daily Check-in")
 
-col1, col2 = st.columns(2)
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    gym = st.selectbox("Gym", ["Yes", "No"])
-    junk = st.selectbox("Junk Food", ["Yes", "No"])
+    gym = st.radio("Gym", ["Yes", "No"], horizontal=True)
 
 with col2:
-    study = st.number_input("Study Hours", min_value=0.0, step=0.5)
-    spend = st.number_input("Money Spent (₹)", min_value=0)
+    junk = st.radio("Junk Food", ["Yes", "No"], horizontal=True)
+
+with col3:
+    study = st.number_input("Study (hrs)", min_value=0.0, step=0.5)
+
+with col4:
+    spend = st.number_input("Spend (₹)", min_value=0)
 
 if st.button("Save Today"):
     new_data = pd.DataFrame({
@@ -102,54 +85,56 @@ if st.button("Save Today"):
 
     df = pd.concat([df, new_data], ignore_index=True)
     save_data(df)
-    st.success("Saved successfully")
+    st.success("Saved")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ---------- DASHBOARD ----------
+# ---------- SUMMARY ----------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("Performance Overview")
+st.subheader("Today Summary")
 
 if not df.empty:
-    col1, col2, col3 = st.columns(3)
+    today = df.iloc[-1]
 
-    col1.markdown(f"""
-    <div class='metric-card'>
-        <h3>₹{int(df['spending'].sum())}</h3>
-        <p>Total Spending</p>
-    </div>
-    """, unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
 
-    col2.markdown(f"""
-    <div class='metric-card'>
-        <h3>{float(df['study_hours'].sum())}</h3>
-        <p>Study Hours</p>
-    </div>
-    """, unsafe_allow_html=True)
+    col1.metric("Gym", today["gym"])
+    col2.metric("Junk Food", today["junk_food"])
+    col3.metric("Study", f"{today['study_hours']} hrs")
+    col4.metric("Spend", f"₹{today['spending']}")
 
-    col3.markdown(f"""
-    <div class='metric-card'>
-        <h3>{len(df)}</h3>
-        <p>Days Tracked</p>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("### Study Trend")
+# ---------- HISTORY ----------
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+st.subheader("Last 7 Days")
+
+if not df.empty:
+    st.dataframe(df.tail(7), use_container_width=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ---------- CHARTS ----------
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+st.subheader("Progress")
+
+if not df.empty:
+    st.write("Study Trend")
     st.line_chart(df["study_hours"])
 
-    st.markdown("### Spending Trend")
+    st.write("Spending Trend")
     st.bar_chart(df["spending"])
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ---------- AI STYLE FEEDBACK (FREE) ----------
+# ---------- AI STYLE FEEDBACK ----------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.subheader("AI Coach")
 
 
 def get_ai_feedback(df):
     if df.empty:
-        return "Start tracking first."
+        return "Start tracking first"
 
     recent = df.tail(5)
 
@@ -157,24 +142,24 @@ def get_ai_feedback(df):
     avg_study = recent["study_hours"].mean()
     junk_days = (recent["junk_food"] == "Yes").sum()
 
-    message = ""
+    msg = ""
 
     if gym_missed >= 3:
-        message += "You are losing discipline in gym. "
+        msg += "Gym consistency is poor. "
     else:
-        message += "Gym consistency is improving. "
+        msg += "Gym consistency is okay. "
 
     if avg_study < 2:
-        message += "Your focus is weak. "
+        msg += "Study hours are low. "
     else:
-        message += "You are building focus. "
+        msg += "Study is improving. "
 
     if junk_days >= 3:
-        message += "Your diet is hurting performance. "
+        msg += "Too much junk food. "
 
-    message += "\n\nTomorrow: Train hard, stay focused, spend less, and stay disciplined."
+    msg += "\n\nTomorrow: Go to gym, study more, eat clean, spend wisely."
 
-    return message
+    return msg
 
 if st.button("Get Feedback"):
     st.write(get_ai_feedback(df))
@@ -182,5 +167,4 @@ if st.button("Get Feedback"):
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------- FOOTER ----------
-st.markdown("---")
-st.caption("Designed for discipline and growth")
+st.caption("Keep improving daily")
