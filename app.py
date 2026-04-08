@@ -81,11 +81,9 @@ if not df.empty:
     # Spending with budget logic
     spend_val = today['spending']
     if spend_val > DAILY_BUDGET:
-        t4.markdown(f"**Spend: ₹{spend_val}**  
-<span class='bad'>Over budget</span>", unsafe_allow_html=True)
+        t4.markdown(f"**Spend: ₹{spend_val}**<br><span class='bad'>Over budget</span>", unsafe_allow_html=True)
     else:
-        t4.markdown(f"**Spend: ₹{spend_val}**  
-<span class='good'>Within budget</span>", unsafe_allow_html=True)
+        t4.markdown(f"**Spend: ₹{spend_val}**<br><span class='good'>Within budget</span>", unsafe_allow_html=True)
 
     # Budget progress bar
     progress = min(spend_val / DAILY_BUDGET, 1.0)
