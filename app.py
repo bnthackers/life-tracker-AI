@@ -40,8 +40,13 @@ if st.sidebar.button("Reset All Data"):
     st.sidebar.success("Data reset!")
 
 # ---------- HEADER ----------
-st.title("AI Life Tracker")
-st.caption("Track daily habits and stay disciplined")
+st.markdown("""
+<div style='padding:10px 0 20px 0;'>
+    <h1 style='margin-bottom:5px;'>AI Life Tracker</h1>
+    <p style='color:#94a3b8;'>Track habits. Stay disciplined. Improve daily.</p>
+</div>
+""", unsafe_allow_html=True)
+
 
 # ---------- INPUT ----------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
