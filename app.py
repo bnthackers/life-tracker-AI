@@ -98,8 +98,10 @@ if not df.empty:
 
     # Budget progress bar
     progress = min(spend_val / DAILY_BUDGET, 1.0)
-    st.progress(progress)
-    st.caption(f"Budget used: ₹{spend_val} / ₹{DAILY_BUDGET}")
+    # Budget progress (only show if spending > 0)
+    if spend_val > 0:
+        st.progress(progress)
+        st.caption(f"Budget used: ₹{spend_val} / ₹{DAILY_BUDGET}")
 
 else:
     st.write("No data yet")
