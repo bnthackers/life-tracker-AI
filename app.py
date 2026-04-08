@@ -7,14 +7,27 @@ st.set_page_config(page_title="AI Life Tracker", layout="wide")
 
 DAILY_BUDGET = 200
 
-# ---------- STYLE ----------
+# ---------- MOBILE FRIENDLY CSS ----------
 st.markdown("""
 <style>
 .main {background-color:#0f172a;color:white;}
-.card {background:#1e293b;padding:18px;border-radius:12px;margin-bottom:16px;}
-.section-title {font-size:20px;font-weight:600;margin-bottom:10px}
-.bad {color:#ef4444;font-weight:600}
-.good {color:#22c55e;font-weight:600}
+.card {background:#1e293b;padding:16px;border-radius:12px;margin-bottom:16px;}
+.section-title {font-size:18px;font-weight:600;margin-bottom:8px}
+
+/* Make everything stack nicely on small screens */
+@media (max-width: 768px) {
+    .block-container {padding-left: 1rem; padding-right: 1rem;}
+}
+
+/* Buttons full width on mobile */
+.stButton>button {
+    width: 100%;
+    border-radius: 8px;
+    height: 44px;
+    background-color: #22c55e;
+    color: white;
+    font-weight: 600;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -41,25 +54,25 @@ if st.sidebar.button("Reset All Data"):
 
 # ---------- HEADER ----------
 st.markdown("""
-<div style='padding:10px 0 20px 0;'>
-    <h1 style='margin-bottom:5px;'>AI Life Tracker</h1>
-    <p style='color:#94a3b8;'>Track habits. Stay disciplined. Improve daily.</p>
+<div style='padding:10px 0 15px 0;'>
+    <h2>AI Life Tracker</h2>
+    <p style='color:#94a3b8;'>Track habits. Improve daily.</p>
 </div>
 """, unsafe_allow_html=True)
-
 
 # ---------- INPUT ----------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.markdown("<div class='section-title'>Daily Check-in</div>", unsafe_allow_html=True)
 
-c1,c2,c3,c4 = st.columns(4)
-with c1:
+# Stack-friendly layout
+col1, col2 = st.columns(2)
+
+with col1:
     gym = st.radio("Gym", ["Yes","No"], horizontal=True)
-with c2:
     junk = st.radio("Junk Food", ["Yes","No"], horizontal=True)
-with c3:
+
+with col2:
     study = st.number_input("Study (hrs)", min_value=0.0, step=0.5)
-with c4:
     spend = st.number_input("Spend (₹)", min_value=0)
 
 if st.button("Save Today"):
@@ -76,67 +89,38 @@ if st.button("Save Today"):
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ---------- TODAY SUMMARY ----------
+# ---------- TODAY ----------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.markdown("<div class='section-title'>Today Summary</div>", unsafe_allow_html=True)
 
 if not df.empty:
     today = df.iloc[-1]
 
-    t1,t2,t3,t4 = st.columns(4)
+    t1, t2 = st.columns(2)
+    t3, t4 = st.columns(2)
 
     t1.metric("Gym", today["gym"])
     t2.metric("Junk", today["junk_food"])
     t3.metric("Study", f"{today['study_hours']} hrs")
 
-    # Spending with budget logic
     spend_val = today['spending']
     if spend_val > DAILY_BUDGET:
-        t4.markdown(f"**Spend: ₹{spend_val}**<br><span class='bad'>Over budget</span>", unsafe_allow_html=True)
+        t4.markdown(f"**₹{spend_val}** 🔴 Over")
     else:
-        t4.markdown(f"**Spend: ₹{spend_val}**<br><span class='good'>Within budget</span>", unsafe_allow_html=True)
-
-    # Budget progress bar
-    progress = min(spend_val / DAILY_BUDGET, 1.0)
-    # Budget progress (only show if spending > 0)
-    if spend_val > 0:
-        st.progress(progress)
-        st.caption(f"Budget used: ₹{spend_val} / ₹{DAILY_BUDGET}")
-
-else:
-    st.write("No data yet")
+        t4.markdown(f"**₹{spend_val}** 🟢 OK")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------- PROGRESS ----------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.markdown("<div class='section-title'>Progress Overview</div>", unsafe_allow_html=True)
+st.markdown("<div class='section-title'>Progress</div>", unsafe_allow_html=True)
 
 if not df.empty:
-    col1,col2 = st.columns(2)
+    st.write("Study")
+    st.line_chart(df.set_index("date")["study_hours"], use_container_width=True)
 
-    with col1:
-        st.write("Study Trend")
-        st.line_chart(df.set_index("date")["study_hours"])
-
-        st.write("Gym Consistency")
-        st.bar_chart(df["gym"].value_counts())
-
-    with col2:
-        st.write("Spending Trend")
-        st.bar_chart(df.set_index("date")["spending"])
-
-        st.write("Junk Food Pattern")
-        st.bar_chart(df["junk_food"].value_counts())
-
-st.markdown("</div>", unsafe_allow_html=True)
-
-# ---------- HISTORY ----------
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.markdown("<div class='section-title'>Last 7 Days</div>", unsafe_allow_html=True)
-
-if not df.empty:
-    st.dataframe(df.tail(7), use_container_width=True)
+    st.write("Spending")
+    st.bar_chart(df.set_index("date")["spending"], use_container_width=True)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -154,27 +138,23 @@ def get_ai_feedback(df):
     gym_missed = (recent["gym"] == "No").sum()
     avg_study = recent["study_hours"].mean()
     junk_days = (recent["junk_food"] == "Yes").sum()
-    spend_total = recent["spending"].sum()
 
     msg = ""
 
     if gym_missed >= 3:
-        msg += "You are skipping gym too often. "
+        msg += "Skip gym too much. "
     else:
-        msg += "Gym consistency is okay. "
+        msg += "Gym okay. "
 
     if avg_study < 2:
-        msg += "Study is weak. "
+        msg += "Study low. "
     else:
-        msg += "Study is improving. "
+        msg += "Study good. "
 
     if junk_days >= 3:
-        msg += "Too much junk food. "
+        msg += "Too much junk. "
 
-    if spend_total > DAILY_BUDGET * 5:
-        msg += "You are overspending consistently. "
-
-    msg += "\n\nTomorrow: Gym + 2hr study + no junk + spend under ₹200."
+    msg += "\n\nTomorrow: Gym + Study + No junk + Spend < 200"
 
     return msg
 
@@ -184,4 +164,4 @@ if not df.empty:
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------- FOOTER ----------
-st.caption("Stay consistent. Improve daily.")
+st.caption("Consistency > Motivation")
