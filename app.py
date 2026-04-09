@@ -1,9 +1,16 @@
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
-from groq import Groq
 import os
 import random
+
+# Try to import Groq, with fallback
+try:
+    from groq import Groq
+    GROQ_AVAILABLE = True
+except ImportError:
+    GROQ_AVAILABLE = False
+    st.warning("⚠️ Groq library not installed. Using fallback feedback mode. Run: pip install groq")
 
 # ---------- PAGE CONFIG ----------
 st.set_page_config(
@@ -354,10 +361,18 @@ def save_data(df):
 # ---------- GROQ AI SETUP (FREE!) ----------
 @st.cache_resource
 def get_groq_client():
-    api_key = os.getenv('GROQ_API_KEY')
+    if not GROQ_AVAILABLE:
+        return None
+    
+    api_key = st.secrets.get('GROQ_API_KEY') or os.getenv('GROQ_API_KEY')
     if not api_key:
         return None
-    return Groq(api_key=api_key)
+    
+    try:
+        return Groq(api_key=api_key)
+    except Exception as e:
+        st.warning(f"⚠️ Could not connect to Groq: {str(e)}")
+        return None
 
 def get_fallback_feedback(df):
     """Fallback feedback when API is not available"""
