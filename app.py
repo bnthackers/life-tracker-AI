@@ -86,25 +86,25 @@ st.markdown("""
     
     /* Input section styling */
     .input-card {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-        border: 2px solid rgba(99, 102, 241, 0.3);
-        border-radius: 20px;
-        padding: 32px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        backdrop-filter: none;
+        transition: none;
     }
     
     .input-card:hover {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
-        border-color: rgba(99, 102, 241, 0.6);
+        background: transparent;
+        border-color: transparent;
     }
     
     /* Input labels */
     .input-label {
-        font-size: 0.95rem;
-        font-weight: 600;
+        font-size: 0.85rem;
+        font-weight: 700;
         color: #cbd5e1;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         display: block;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -117,54 +117,55 @@ st.markdown("""
         margin-bottom: 20px;
     }
     
-    /* Number input styling */
+    /* Number input styling - COMPACT */
     .stNumberInput input {
-        background: rgba(15, 23, 42, 0.8) !important;
-        border: 2px solid rgba(148, 163, 184, 0.3) !important;
-        border-radius: 12px !important;
-        padding: 12px 16px !important;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid rgba(99, 102, 241, 0.4) !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
         color: #e2e8f0 !important;
-        font-size: 1rem !important;
+        font-size: 0.95rem !important;
         font-weight: 600 !important;
         transition: all 0.3s ease !important;
+        height: 38px !important;
     }
     
     .stNumberInput input:hover {
-        border-color: rgba(148, 163, 184, 0.6) !important;
-        background: rgba(15, 23, 42, 0.95) !important;
+        border-color: rgba(99, 102, 241, 0.7) !important;
+        background: rgba(15, 23, 42, 0.8) !important;
     }
     
     .stNumberInput input:focus {
         border-color: #6366f1 !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1) !important;
     }
     
-    /* Button styling */
+    /* Button styling - COMPACT */
     .stButton > button {
         width: 100%;
         background: linear-gradient(135deg, #00d4ff 0%, #0099ff 50%, #6366f1 100%);
         color: white;
         border: none;
-        border-radius: 14px;
-        padding: 16px 24px;
-        font-size: 1.05rem;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 0.95rem;
         font-weight: 700;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
         cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 20px rgba(0, 212, 255, 0.25);
         text-transform: uppercase;
         position: relative;
         overflow: hidden;
     }
     
     .stButton > button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 20px 50px rgba(0, 212, 255, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0, 212, 255, 0.4);
     }
     
     .stButton > button:active {
-        transform: translateY(-1px);
+        transform: translateY(0);
     }
     
     /* Metric display */
@@ -330,16 +331,19 @@ st.markdown("""
         font-weight: 600 !important;
     }
     
-    /* Expander */
-    .streamlit-expanderHeader {
-        background-color: transparent !important;
-        border: 2px solid rgba(99, 102, 241, 0.3) !important;
-        border-radius: 12px !important;
+    /* Hide default dividers */
+    hr {
+        margin: 8px 0 !important;
     }
     
-    .streamlit-expanderHeader:hover {
-        background-color: rgba(99, 102, 241, 0.1) !important;
-        border-color: rgba(99, 102, 241, 0.6) !important;
+    /* Tighter spacing */
+    .stColumn {
+        gap: 8px !important;
+    }
+    
+    /* Reduce margins */
+    .stMarkdown {
+        margin-bottom: 4px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -448,34 +452,32 @@ with col2:
     st.markdown('<p class="subtitle">Track. Grow. Transform. Your life, optimized daily.</p>', unsafe_allow_html=True)
 
 # ---------- INPUT SECTION ----------
-st.markdown('<div class="glass-card input-card">', unsafe_allow_html=True)
+st.markdown('<h2 style="color: #00d4ff; font-weight: 800; margin-bottom: 16px;">📝 Today\'s Check-in</h2>', unsafe_allow_html=True)
 
-st.markdown('<span class="input-label">📝 Today\'s Check-in</span>', unsafe_allow_html=True)
-
-col1, col2, col3, col4 = st.columns(4, gap="medium")
+col1, col2, col3, col4 = st.columns(4, gap="small")
 
 with col1:
-    st.markdown('<span class="input-label">💪 Gym Today?</span>', unsafe_allow_html=True)
+    st.markdown('<span class="input-label">💪 Gym?</span>', unsafe_allow_html=True)
     gym = st.radio("", ["Yes","No"], horizontal=True, label_visibility="collapsed", key="gym_input")
 
 with col2:
-    st.markdown('<span class="input-label">📚 Study Hours</span>', unsafe_allow_html=True)
+    st.markdown('<span class="input-label">📚 Study (h)</span>', unsafe_allow_html=True)
     study = st.number_input("", min_value=0.0, step=0.5, value=0.0, label_visibility="collapsed", key="study_input")
 
 with col3:
-    st.markdown('<span class="input-label">🍕 Junk Food?</span>', unsafe_allow_html=True)
+    st.markdown('<span class="input-label">🍕 Junk?</span>', unsafe_allow_html=True)
     junk = st.radio("", ["Yes","No"], horizontal=True, label_visibility="collapsed", key="junk_input")
 
 with col4:
-    st.markdown('<span class="input-label">💰 Spending (₹)</span>', unsafe_allow_html=True)
+    st.markdown('<span class="input-label">💰 Spend (₹)</span>', unsafe_allow_html=True)
     spend = st.number_input("", min_value=0, value=0, label_visibility="collapsed", key="spend_input")
 
-st.divider()
+st.markdown('<br>', unsafe_allow_html=True)
 
-btn_col1, btn_col2, btn_col3 = st.columns([2, 1, 1])
+btn_col1, btn_col2, btn_col3 = st.columns([3, 0.5, 0.5], gap="small")
 
 with btn_col1:
-    if st.button("🎯 SAVE TODAY'S ENTRY", use_container_width=True, key="save_btn"):
+    if st.button("💾 SAVE", use_container_width=True, key="save_btn"):
         today = date.today()
         existing = df[df['date'].dt.date == today] if not df.empty else pd.DataFrame()
         
@@ -492,15 +494,15 @@ with btn_col1:
             df = pd.concat([df, new_entry], ignore_index=True)
         
         save_data(df)
-        st.success("✅ Entry saved! Your AI coach is analyzing your progress...")
+        st.success("✅ Saved!")
         st.balloons()
 
 with btn_col2:
-    if st.button("🔄", use_container_width=True, help="Reset form"):
+    if st.button("↻", use_container_width=True, help="Reset form", key="reset_form"):
         st.rerun()
 
 with btn_col3:
-    if st.button("🗑️", use_container_width=True, help="Reset all data"):
+    if st.button("🗑️", use_container_width=True, help="Reset all data", key="reset_all"):
         if st.session_state.get('confirm_reset'):
             df = pd.DataFrame(columns=["date","gym","study_hours","junk_food","spending"])
             save_data(df)
@@ -508,9 +510,9 @@ with btn_col3:
             st.session_state.confirm_reset = False
         else:
             st.session_state.confirm_reset = True
-            st.warning("⚠️ Click again to confirm reset")
+            st.warning("⚠️ Click again to confirm")
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.divider()
 
 # ---------- TODAY SUMMARY ----------
 if not df.empty:
